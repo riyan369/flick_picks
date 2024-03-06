@@ -1,27 +1,74 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flick_picks/HomePage/HomePage.dart';
 import 'package:flick_picks/sectionPages/registration_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../components/my_button.dart';
 import '../components/my_textfield.dart';
+import '../services/authservice.dart';
+
+
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
 
   final usernameController = TextEditingController();
   final passwordController = TextEditingController();
+  final storage = FlutterSecureStorage();
+  AuthService service = AuthService();
 
-  void signUserIn(BuildContext context) {
-    // Add your sign-in logic here
-    // This could include validating credentials, making API calls, etc.
-    // For now, let's assume the validation is successful
 
-    // Navigate to the next page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => HomePage(),
-      ),
+  showError(BuildContext context, String content, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              child: const Text("Ok"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
     );
+  }
+
+  Future<void> signUserIn(BuildContext context) async {
+    var user = jsonEncode(
+        {"email": usernameController.text, "password": passwordController.text});
+    try {
+        final Response? response = await service.loginUser(user);
+        print(response!.data);
+        Map<String, String> allValues = await storage.readAll();
+        String normalizedSource =
+        base64Url.normalize(allValues["token"]!.split(".")[1]);
+        String userid =
+        json.decode(utf8.decode(base64Url.decode(normalizedSource)))["_id"];
+        print(userid);
+        await storage.write(key: "userid", value: userid);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ),
+      );
+    } on DioException catch (e) {
+      if (e.response != null) {
+        print(e.response!.data);
+
+        showError(context,e.response!.data["msg"], "Login Failed");
+      } else {
+        // Something happened in setting up or sending the request that triggered an Error
+        showError(context,"Error occured,please try againlater", "Oops");
+      }
+    }
   }
 
   @override

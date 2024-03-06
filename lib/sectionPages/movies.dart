@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:flick_picks/apikey/apiKey.dart';
+import 'package:flutter/services.dart';
 
 import '../RepeatedFunction/slider.dart';
 
@@ -22,6 +23,7 @@ class _MovieState extends State<Movie> {
   Future<void> moviesfunction() async {
     var popularmoviesurl =
         'https://api.themoviedb.org/3/movie/popular?api_key=$apiKey';
+    print(popularmoviesurl);
     var nowplayingmoviesurl =
         'https://api.themoviedb.org/3/movie/now_playing?api_key=$apiKey';
     var topratedmoviesurl =
@@ -29,10 +31,14 @@ class _MovieState extends State<Movie> {
     var latestmoviesurl =
         'https://api.themoviedb.org/3/movie/latest?api_key=$apiKey';
     /////////////////////////////////
-    var popularmoviesresponse = await http.get(Uri.parse(popularmoviesurl));
-    if (popularmoviesresponse.statusCode == 200) {
-      var tempdata = jsonDecode(popularmoviesresponse.body);
-      var popularmoviesjson = tempdata['results'];
+   // var popularmoviesresponse = await http.get(Uri.parse(popularmoviesurl));
+    var popularmoviesresponse = await rootBundle.loadString('assets/responses/movie_popular.json');
+    print(popularmoviesresponse);
+
+    // if (popularmoviesresponse.statusCode == 200) {
+     // var tempdata = jsonDecode(popularmoviesresponse.body);
+      var tempdataPP = jsonDecode(popularmoviesresponse);
+      var popularmoviesjson = tempdataPP['results'];
       for (var i = 0; i < popularmoviesjson.length; i++) {
         popularmovies.add({
           "name": popularmoviesjson[i]["title"],
@@ -42,15 +48,17 @@ class _MovieState extends State<Movie> {
           "id": popularmoviesjson[i]["id"],
         });
       }
-    } else {
-      print(popularmoviesresponse.statusCode);
-    }
+    // } else {
+    //   print(popularmoviesresponse.statusCode);
+    // }
     /////////////////////////////////////////////
-    var nowplayingmoviesresponse =
-    await http.get(Uri.parse(nowplayingmoviesurl));
-    if (nowplayingmoviesresponse.statusCode == 200) {
-      var tempdata = jsonDecode(nowplayingmoviesresponse.body);
-      var nowplayingmoviesjson = tempdata['results'];
+    //var nowplayingmoviesresponse = await http.get(Uri.parse(nowplayingmoviesurl));
+    var nowplayingmoviesresponse = await rootBundle.loadString('assets/responses/movie_now_playing.json');
+
+    //if (nowplayingmoviesresponse.statusCode == 200) {
+      //var tempdata = jsonDecode(nowplayingmoviesresponse.body);
+    var tempdataNP = jsonDecode(nowplayingmoviesresponse);
+      var nowplayingmoviesjson = tempdataNP['results'];
       for (var i = 0; i < nowplayingmoviesjson.length; i++) {
         nowplayingmovies.add({
           "name": nowplayingmoviesjson[i]["title"],
@@ -60,14 +68,17 @@ class _MovieState extends State<Movie> {
           "id": nowplayingmoviesjson[i]["id"],
         });
       }
-    } else {
-      print(nowplayingmoviesresponse.statusCode);
-    }
+    // } else {
+    //   print(nowplayingmoviesresponse.statusCode);
+    // }
     /////////////////////////////////////////////
-    var topratedmoviesresponse = await http.get(Uri.parse(topratedmoviesurl));
-    if (topratedmoviesresponse.statusCode == 200) {
-      var tempdata = jsonDecode(topratedmoviesresponse.body);
-      var topratedmoviesjson = tempdata['results'];
+   // var topratedmoviesresponse = await http.get(Uri.parse(topratedmoviesurl));
+    var topratedmoviesresponse = await rootBundle.loadString('assets/responses/movie_top_rated.json');
+
+    // if (topratedmoviesresponse.statusCode == 200) {
+     // var tempdata = jsonDecode(topratedmoviesresponse.body);
+    var tempdataTR = jsonDecode(topratedmoviesresponse);
+      var topratedmoviesjson = tempdataTR['results'];
       for (var i = 0; i < topratedmoviesjson.length; i++) {
         topratedmovies.add({
           "name": topratedmoviesjson[i]["title"],
@@ -77,9 +88,9 @@ class _MovieState extends State<Movie> {
           "id": topratedmoviesjson[i]["id"],
         });
       }
-    } else {
-      print(topratedmoviesresponse.statusCode);
-    }
+    // } else {
+    //   print(topratedmoviesresponse.statusCode);
+    // }
   }
 
   @override

@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import '../RepeatedFunction/repttext.dart';
 import '../RepeatedFunction/slider.dart';
 import '../apikey/apiKey.dart';
+import 'package:flutter/services.dart';
 
 class Upcomming extends StatefulWidget {
   const Upcomming({super.key});
@@ -16,11 +17,13 @@ class Upcomming extends StatefulWidget {
 class _UpcommingState extends State<Upcomming> {
   List<Map<String, dynamic>> getUpcomminglist = [];
   Future<void> getUpcomming() async {
-    var url = Uri.parse(
-        'https://api.themoviedb.org/3/movie/upcoming?api_key=$apiKey');
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      var json = jsonDecode(response.body);
+    var url = Uri.parse('https://api.themoviedb.org/3/movie/upcoming?api_key=$apiKey');
+    //var response = await http.get(url);
+   // if (response.statusCode == 200) {
+    var response = await rootBundle.loadString('assets/responses/movie_upcoming.json');
+
+    //var json = jsonDecode(response.body);
+    var json = jsonDecode(response);
       for (var i = 0; i < json['results'].length; i++) {
         getUpcomminglist.add({
           "poster_path": json['results'][i]['poster_path'],
@@ -30,9 +33,9 @@ class _UpcommingState extends State<Upcomming> {
           "id": json['results'][i]['id'],
         });
       }
-    } else {
-      print("error");
-    }
+    // } else {
+    //   print("error");
+    // }
   }
 
   @override

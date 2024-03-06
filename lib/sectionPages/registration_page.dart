@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 import 'package:flick_picks/HomePage/HomePage.dart';
 import 'package:flutter/material.dart';
 import '../components/my_button.dart';
 import '../components/my_textfield.dart';
+import '../services/authservice.dart';
 import 'login_page.dart';
 
 class RegistrationPage extends StatelessWidget {
@@ -11,19 +15,82 @@ class RegistrationPage extends StatelessWidget {
   final emailController = TextEditingController();
   final numberController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmpassword = TextEditingController();
+  AuthService service = AuthService();
   final _formKey = GlobalKey<FormState>();
 
-  void signUserUp(BuildContext context) {
+
+
+  showError(BuildContext context, String content, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) { // Explicitly specify the type here
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: [
+            TextButton(
+              child: Text("Ok"),
+              onPressed: () {
+                if (title == "Registration Successful") {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ),
+                  );                } else {
+                  Navigator.of(dialogContext).pop();
+                }
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> signUserUp() async {
     if (_formKey.currentState?.validate() ?? false) {
       BuildContext context = _formKey.currentContext!;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(),
-        ),
-      );
+
+      var user = jsonEncode({
+        "name": usernameController.text,
+        "email": emailController.text,
+        "phone": numberController.text,
+        "password": passwordController.text,
+        "usertype": "customer",
+      });
+      print(user);
+      try {
+        final response = await service.registerUser(user);
+        showError(context,"Registration process completed", "Registration Successful");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomePage(),
+          ),
+        );
+      } on DioException catch (e) {
+        if (e.response != null) {
+          print(e.response!.data);
+
+          showError(context, e.response!.data["msg"], "Registration Failed");
+        } else {
+          // Something happened in setting up or sending the request that triggered an Error
+          showError(context, "Error occured,please try againlater", "Oops");
+        }
+      }
     }
   }
+
+
+
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +171,7 @@ class RegistrationPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   MyTextField(
-                    controller: passwordController,
+                    controller: confirmpassword,
                     hintText: 'Confirm Password',
                     obscureText: true,
                     validator: (value) {
@@ -118,7 +185,7 @@ class RegistrationPage extends StatelessWidget {
                   const SizedBox(height: 10),
                   const SizedBox(height: 25),
                   MyButton(
-                    onTap: () => signUserUp(context),
+                    onTap: () => signUserUp(),
                     buttonName: "Sign Up",
                   ),
                   const SizedBox(height: 50),
@@ -156,3 +223,4 @@ class RegistrationPage extends StatelessWidget {
     );
   }
 }
+

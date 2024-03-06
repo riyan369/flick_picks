@@ -9,6 +9,7 @@ import '../sectionPages/movies.dart';
 import '../sectionPages/profile_page.dart';
 import '../sectionPages/tvseries.dart';
 import '../sectionPages/upcoming.dart';
+import 'package:flutter/services.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -26,9 +27,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       var trendingweekurl =
           'https://api.themoviedb.org/3/trending/all/week?api_key=$apiKey';
 
-      var trendingWeekResponse = await http.get(Uri.parse(trendingweekurl));
-      if (trendingWeekResponse.statusCode == 200) {
-        var tempdata = jsonDecode(trendingWeekResponse.body);
+     // var trendingWeekResponse = await http.get(Uri.parse(trendingweekurl));
+      var trendingWeekResponse = await rootBundle.loadString('assets/responses/trending_all_weekly.json');
+
+     // if (trendingWeekResponse.statusCode == 200) {
+        //var tempdata = jsonDecode(trendingWeekResponse.body);
+        var tempdata = jsonDecode(trendingWeekResponse);
         var trendingweekjson = tempdata['results'];
 
         for (var i = 0; i < trendingweekjson.length; i++) {
@@ -40,14 +44,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             'indexno': i,
           });
         }
-      }
+     // }
     }
     else if (uval == 2) {
       var trendingdailyurl =
           'https://api.themoviedb.org/3/trending/all/day?api_key=$apiKey';
-      var trendingDailyResponse = await http.get(Uri.parse(trendingdailyurl));
-      if (trendingDailyResponse.statusCode == 200) {
-        var tempdata = jsonDecode(trendingDailyResponse.body);
+      //var trendingDailyResponse = await http.get(Uri.parse(trendingdailyurl));
+      var trendingDailyResponse = await rootBundle.loadString('assets/responses/trending_all_day.json');
+
+      //if (trendingDailyResponse.statusCode == 200) {
+       // var tempdata = jsonDecode(trendingDailyResponse.body);
+        var tempdata = jsonDecode(trendingDailyResponse);
         var trendingdailyjson = tempdata['results'];
 
         for (var i = 0; i < trendingdailyjson.length; i++) {
@@ -59,7 +66,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             'indexno': i,
           });
         }
-      }
+      //}
     }
   }
 
