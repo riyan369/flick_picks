@@ -7,13 +7,17 @@ import 'package:flick_picks/apikey/apiKey.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 
 
+import '../RepeatedFunction/customReviewUI.dart';
 import '../RepeatedFunction/reviewui.dart';
 import '../RepeatedFunction/trailerui.dart';
+import '../services/authservice.dart';
 import '../services/reviewservice.dart';
+import '../services/favservice.dart';
 
 
 
@@ -34,8 +38,11 @@ class _MovieDetailState extends State<MovieDetail> {
   List<Map<String, dynamic>> recommendedmovieslist = [];
   List<Map<String, dynamic>> movietrailerslist = [];
   ReviewService service = ReviewService();
-  late String Rating;
-  late String Review;
+  AuthService _authService = AuthService();
+  FavService _favService = FavService();
+  final storage = const FlutterSecureStorage();
+
+
 
 
   showError(BuildContext context, String content, String title) {
@@ -72,20 +79,54 @@ class _MovieDetailState extends State<MovieDetail> {
               child: Text("Cancel"),
             ),
             TextButton(
-              onPressed: () {
-                // Implement functionality to save the movie as a favorite
-                // You can use the movie details or ID to identify the movie and save it as a favorite
-                // Add your logic here...
+              onPressed: () async {
+                Map<String, String> allValues = await storage.readAll();
+                String? userid = allValues["userid"];
 
-                // Show a confirmation message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text("Movie added to favorites"),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                var fav = jsonEncode({
+                  "typeId": widget.id.toString(),
+                  "userId": userid,
+                  "type" : "movie"
+                });
 
-                Navigator.of(context).pop(); // Close the dialog
+                var movieData = jsonEncode({
+                  "dataId": widget.id.toString(),
+                  "type_data": "movie",
+                  "poster_path": MovieDetails[0]["poster_path"],
+                  "name": MovieDetails[0]["title"],
+                  "vote_average": MovieDetails[0]['vote_average'],
+                  "date": MovieDetails[0]['release_date'],
+                });
+                print('Move Data------------- $movieData');
+                try {
+                  final Response res = await _favService.saveFav(fav,movieData);
+                  Navigator.of(context).pop();
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text("Movie added to favorites"),
+                      duration: Duration(seconds: 2),
+                    ),
+                  );
+                } on DioException catch (e) {
+                  if (e.response != null) {
+                    print(e.response!.data);
+                    Navigator.of(context).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Movie already added"),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  } else {
+                    Navigator.of(context).pop();                  }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text("Movie Failed to add to favorites"),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                }
               },
               child: Text("Add to Favorites"),
             ),
@@ -121,11 +162,23 @@ class _MovieDetailState extends State<MovieDetail> {
     //   var moviedetailjson = jsonDecode(moviedetailresponse.body);
     var moviedetailjson = jsonDecode(moviedetailresponse);
       for (var i = 0; i < 1; i++) {
-      // final responseData = await service.getReview(moviedetailjson['id']);
-        Map<String, dynamic> response = {
-          'rating': 10,
-          'review': 'text',
-        };
+
+          int movie_id = moviedetailjson['id'];
+          var response = await service.getReview(movie_id);
+
+          Map<String, dynamic> responseData = response;
+          print(responseData);
+
+  // Check if 'averageRating' is present in the response
+            double averageRating = responseData['averageRating'].toDouble();
+            String formattedRating = averageRating.toStringAsFixed(2);
+
+            print('Average Rating: $formattedRating');
+
+
+
+        List<Map<String, dynamic>> reviews = List<Map<String, dynamic>>.from(responseData['reviews']);
+          print(reviews);
         MovieDetails.add({
           "backdrop_path": moviedetailjson['backdrop_path'],
           "title": moviedetailjson['title'],
@@ -136,8 +189,9 @@ class _MovieDetailState extends State<MovieDetail> {
           "budget": moviedetailjson['budget'],
           "revenue": moviedetailjson['revenue'],
           "id": moviedetailjson['id'],
-          'flickRating' : response['rating'],
-          'flickReview' : response['review'],
+          "poster_path": moviedetailjson['poster_path'],
+          'flickRating' : averageRating,
+          'flickReview' : reviews,
         });
 
       }
@@ -228,6 +282,7 @@ class _MovieDetailState extends State<MovieDetail> {
     double userRating = 0; // Initialize the user rating
     TextEditingController userReviewController = TextEditingController();
 
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -271,15 +326,21 @@ class _MovieDetailState extends State<MovieDetail> {
             TextButton(
               onPressed: () async {
                 // Implement functionality to save the review and rating
+                Map<String, String> allValues = await storage.readAll();
+                String? userid = allValues["userid"];
+                final Response res = await _authService.getUser(userid!);
+                // Access the "name" field
+                String name = res.data["email"];
+                print("UserData: $name");
                 print("Review: ${userReviewController.text}");
                 print("Rating: $userRating");
                 print("Movie ID: ${widget.id.toString()}");
                 var review = jsonEncode({
                   "movieId": widget.id.toString(),
-                  "userId": "123",
+                  "userId": userid,
                   "rating": "$userRating",
                   "review":"${userReviewController.text}",
-                  "username": "test_user",
+                  "username": name,
                 });
                 try {
                   final response = await service.saveReview(review);
@@ -413,9 +474,7 @@ class _MovieDetailState extends State<MovieDetail> {
                         child: Text(MovieDetails[0]['overview'].toString()),
                       ),
 
-                      Padding(padding: EdgeInsets.only(left: 20,top: 10),
-                        child: ReviewUI(revdeatils: UserREviews),
-                      ),
+
 
                       Padding(padding: EdgeInsets.only(left: 20,top: 10),
                         child: Text('Release Date : '+ MovieDetails[0]['release_date'].toString()),
@@ -423,15 +482,25 @@ class _MovieDetailState extends State<MovieDetail> {
                       Padding(padding: EdgeInsets.only(left: 20,top: 10),
                         child: Text('Budget : '+ MovieDetails[0]['budget'].toString()),
                       ),
-                      Padding(padding: EdgeInsets.only(left: 20,top: 10),
-                        child: Text('Revenue : '+ MovieDetails[0]['revenue'].toString()),
+                      Padding(
+                        padding: EdgeInsets.only(left: 20, top: 10),
+                        child: Row(
+                          children: [
+                            Text('Flick pick rating : ${MovieDetails[0]['flickRating']}'),
+                            Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                              size: 20,
+                            ),
+                          ],
+                        ),
                       ),
-                      Padding(padding: EdgeInsets.only(left: 20,top: 10),
-                        child: Text('Flick pick Rating : '+  MovieDetails[0]['rating'].toString()),
+
+                      Padding(
+                        padding: EdgeInsets.only(left: 20, top: 10),
+                        child: CustomReviewUI(revDetails: MovieDetails[0]['flickReview']),
                       ),
-                      Padding(padding: EdgeInsets.only(left: 20,top: 10),
-                        child: Text('Flick pick Review : '+   MovieDetails[0]['review'].toString()),
-                      ),
+
                       sliderlist(similarmovieslist, 'Similar Movies', 'movie', similarmovieslist.length),
                       sliderlist(recommendedmovieslist, 'Recommend Movies', 'movie', recommendedmovieslist.length),
 

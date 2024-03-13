@@ -29,7 +29,7 @@ class _ReviewUIState extends State<ReviewUI> {
               children: [
                 Expanded(
                   child: Text(
-                    'User Reviews',
+                    'User Reviews IMDB',
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,

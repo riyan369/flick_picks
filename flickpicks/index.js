@@ -11,6 +11,7 @@ const port=3000
 
 var userRoutes=require("./routes/user-routes")
 var reviewRoutes=require("./routes/review-routes")
+var favRoutes=require("./routes/fav-routes")
 
 
 
@@ -43,6 +44,7 @@ app.use(cors());
 
 app.use('/api',userRoutes)
 app.use('/api',reviewRoutes)
+app.use('/api',favRoutes)
 
 
 

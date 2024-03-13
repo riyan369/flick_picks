@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../services/authservice.dart';
 import '../services/utilityservice.dart';
+import '../RepeatedFunction/FavoriteMoviesPage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -268,7 +269,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     changePassword();
                   },
                   child: Text("Password Changes"))
-            ]
+            ],
+            SizedBox(height: 20),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FavoriteMoviesPage()),
+                );
+              },
+              child: Text(" Favorites"),
+            ),
           ],
         ));
   }

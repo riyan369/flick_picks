@@ -8,6 +8,7 @@ routes.post('/login',userController.login)
 routes.post('/register',userController.addUser)
 routes.post('/getuser',userController.findUser)
 
+
 routes.post('/updatePhoneNumber',userController.updatePhoneNumber)
 routes.post('/updateEmail',userController.updateEmail)
 routes.post('/updatePassword',userController.updatePassword)
