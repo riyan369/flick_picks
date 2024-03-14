@@ -31,14 +31,13 @@ class _MovieState extends State<Movie> {
     var latestmoviesurl =
         'https://api.themoviedb.org/3/movie/latest?api_key=$apiKey';
     /////////////////////////////////
-   // var popularmoviesresponse = await http.get(Uri.parse(popularmoviesurl));
-    var popularmoviesresponse = await rootBundle.loadString('assets/responses/movie_popular.json');
+    var popularmoviesresponse = await http.get(Uri.parse(popularmoviesurl));
     print(popularmoviesresponse);
 
-    // if (popularmoviesresponse.statusCode == 200) {
-     // var tempdata = jsonDecode(popularmoviesresponse.body);
-      var tempdataPP = jsonDecode(popularmoviesresponse);
-      var popularmoviesjson = tempdataPP['results'];
+     if (popularmoviesresponse.statusCode == 200) {
+      var tempdata = jsonDecode(popularmoviesresponse.body);
+     // var tempdataPP = jsonDecode(popularmoviesresponse);
+      var popularmoviesjson = tempdata['results'];
       for (var i = 0; i < popularmoviesjson.length; i++) {
         popularmovies.add({
           "name": popularmoviesjson[i]["title"],
@@ -48,17 +47,18 @@ class _MovieState extends State<Movie> {
           "id": popularmoviesjson[i]["id"],
         });
       }
-    // } else {
-    //   print(popularmoviesresponse.statusCode);
-    // }
+    } else {
+      print(popularmoviesresponse.statusCode);
+    }
     /////////////////////////////////////////////
-    //var nowplayingmoviesresponse = await http.get(Uri.parse(nowplayingmoviesurl));
-    var nowplayingmoviesresponse = await rootBundle.loadString('assets/responses/movie_now_playing.json');
+    var nowplayingmoviesresponse = await http.get(Uri.parse(nowplayingmoviesurl));
+  //  var nowplayingmoviesresponse = await rootBundle.loadString('assets/responses/movie_now_playing.json');
 
-    //if (nowplayingmoviesresponse.statusCode == 200) {
-      //var tempdata = jsonDecode(nowplayingmoviesresponse.body);
-    var tempdataNP = jsonDecode(nowplayingmoviesresponse);
-      var nowplayingmoviesjson = tempdataNP['results'];
+
+    if (nowplayingmoviesresponse.statusCode == 200) {
+      var tempdatals = jsonDecode(nowplayingmoviesresponse.body);
+    //var tempdataNP = jsonDecode(nowplayingmoviesresponse);
+      var nowplayingmoviesjson = tempdatals['results'];
       for (var i = 0; i < nowplayingmoviesjson.length; i++) {
         nowplayingmovies.add({
           "name": nowplayingmoviesjson[i]["title"],
@@ -68,17 +68,16 @@ class _MovieState extends State<Movie> {
           "id": nowplayingmoviesjson[i]["id"],
         });
       }
-    // } else {
-    //   print(nowplayingmoviesresponse.statusCode);
-    // }
+    } else {
+      print(nowplayingmoviesresponse.statusCode);
+    }
     /////////////////////////////////////////////
-   // var topratedmoviesresponse = await http.get(Uri.parse(topratedmoviesurl));
-    var topratedmoviesresponse = await rootBundle.loadString('assets/responses/movie_top_rated.json');
-
-    // if (topratedmoviesresponse.statusCode == 200) {
-     // var tempdata = jsonDecode(topratedmoviesresponse.body);
-    var tempdataTR = jsonDecode(topratedmoviesresponse);
-      var topratedmoviesjson = tempdataTR['results'];
+    var topratedmoviesresponse = await http.get(Uri.parse(topratedmoviesurl));
+   // var topratedmoviesresponse = await rootBundle.loadString('assets/responses/movie_top_rated.json');
+     if (topratedmoviesresponse.statusCode == 200) {
+      var tempdata = jsonDecode(topratedmoviesresponse.body);
+   // var tempdataTR = jsonDecode(topratedmoviesresponse);
+      var topratedmoviesjson = tempdata['results'];
       for (var i = 0; i < topratedmoviesjson.length; i++) {
         topratedmovies.add({
           "name": topratedmoviesjson[i]["title"],
@@ -88,15 +87,15 @@ class _MovieState extends State<Movie> {
           "id": topratedmoviesjson[i]["id"],
         });
       }
-    // } else {
-    //   print(topratedmoviesresponse.statusCode);
-    // }
+    } else {
+      print(topratedmoviesresponse.statusCode);
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    // moviesfunction();
+     //moviesfunction();
   }
 
   @override
@@ -111,9 +110,9 @@ class _MovieState extends State<Movie> {
             return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  sliderlist(popularmovies, "Popular Now", "movie", 20),
-                  sliderlist(nowplayingmovies, "Now Playing", "movie", 20),
-                  sliderlist(topratedmovies, "Top Rated", "movie", 20)
+                  sliderlist(popularmovies, "Popular Now", "movie", 10),
+                  sliderlist(nowplayingmovies, "Now Playing", "movie", 10),
+                  sliderlist(topratedmovies, "Top Rated", "movie", 10)
                 ]);
           }
         });

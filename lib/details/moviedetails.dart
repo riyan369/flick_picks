@@ -155,57 +155,81 @@ class _MovieDetailState extends State<MovieDetail> {
         widget.id.toString() +
         '/videos?api_key=$apiKey';
 
-   // var moviedetailresponse = await http.get(Uri.parse(moviedetailurl));
-    var moviedetailresponse = await rootBundle.loadString('assets/responses/details_1096197.json');
+    var moviedetailresponse = await http.get(Uri.parse(moviedetailurl));
+   // var moviedetailresponse = await rootBundle.loadString('assets/responses/details_1096197.json');
 
-    // if (moviedetailresponse.statusCode == 200) {
-    //   var moviedetailjson = jsonDecode(moviedetailresponse.body);
-    var moviedetailjson = jsonDecode(moviedetailresponse);
+     if (moviedetailresponse.statusCode == 200) {
+       var moviedetailjson = jsonDecode(moviedetailresponse.body);
+    //var moviedetailjson = jsonDecode(moviedetailresponse);
       for (var i = 0; i < 1; i++) {
 
-          int movie_id = moviedetailjson['id'];
-          var response = await service.getReview(movie_id);
-
-          Map<String, dynamic> responseData = response;
-          print(responseData);
-
-  // Check if 'averageRating' is present in the response
-            double averageRating = responseData['averageRating'].toDouble();
-            String formattedRating = averageRating.toStringAsFixed(2);
-
-            print('Average Rating: $formattedRating');
+           int movie_id = moviedetailjson['id'];
 
 
 
-        List<Map<String, dynamic>> reviews = List<Map<String, dynamic>>.from(responseData['reviews']);
-          print(reviews);
-        MovieDetails.add({
-          "backdrop_path": moviedetailjson['backdrop_path'],
-          "title": moviedetailjson['title'],
-          "vote_average": moviedetailjson['vote_average'],
-          "overview": moviedetailjson['overview'],
-          "release_date": moviedetailjson['release_date'],
-          "runtime": moviedetailjson['runtime'],
-          "budget": moviedetailjson['budget'],
-          "revenue": moviedetailjson['revenue'],
-          "id": moviedetailjson['id'],
-          "poster_path": moviedetailjson['poster_path'],
-          'flickRating' : averageRating,
-          'flickReview' : reviews,
-        });
+     try{
+       var response = await service.getReview(movie_id);
+       Map<String, dynamic> responseData = response;
+       double averageRating = responseData['averageRating'].toDouble();
+       String formattedRating = averageRating.toStringAsFixed(2);
+       List<Map<String, dynamic>> reviews = List<Map<String, dynamic>>.from(responseData['reviews']);
+       MovieDetails.add({
+         "backdrop_path": moviedetailjson['backdrop_path'],
+         "title": moviedetailjson['title'],
+         "vote_average": moviedetailjson['vote_average'],
+         "overview": moviedetailjson['overview'],
+         "release_date": moviedetailjson['release_date'],
+         "runtime": moviedetailjson['runtime'],
+         "budget": moviedetailjson['budget'],
+         "revenue": moviedetailjson['revenue'],
+         "id": moviedetailjson['id'],
+         "poster_path": moviedetailjson['poster_path'],
+         'flickRating' : averageRating,
+         'flickReview' : reviews,
+       });
+     } on DioException catch (e) {
+          print(e.response!.data);
+          MovieDetails.add({
+            "backdrop_path": moviedetailjson['backdrop_path'],
+            "title": moviedetailjson['title'],
+            "vote_average": moviedetailjson['vote_average'],
+            "overview": moviedetailjson['overview'],
+            "release_date": moviedetailjson['release_date'],
+            "runtime": moviedetailjson['runtime'],
+            "budget": moviedetailjson['budget'],
+            "revenue": moviedetailjson['revenue'],
+            "id": moviedetailjson['id'],
+            "poster_path": moviedetailjson['poster_path'],
+          });
+        }
+
+        // MovieDetails.add({
+        //   "backdrop_path": moviedetailjson['backdrop_path'],
+        //   "title": moviedetailjson['title'],
+        //   "vote_average": moviedetailjson['vote_average'],
+        //   "overview": moviedetailjson['overview'],
+        //   "release_date": moviedetailjson['release_date'],
+        //   "runtime": moviedetailjson['runtime'],
+        //   "budget": moviedetailjson['budget'],
+        //   "revenue": moviedetailjson['revenue'],
+        //   "id": moviedetailjson['id'],
+        //   "poster_path": moviedetailjson['poster_path'],
+        // //  'flickRating' : averageRating,
+        //  // 'flickReview' : reviews,
+        // });
 
       }
       for (var i = 0; i < moviedetailjson['genres'].length; i++) {
         MoviesGeneres.add(moviedetailjson['genres'][i]['name']);
       }
-    // } else {}
+    } else {}
 
     /////////////////////////////User Reviews///////////////////////////////
-   // var UserReviewresponse = await http.get(Uri.parse(UserReviewurl));
-    var UserReviewresponse = await rootBundle.loadString('assets/responses/reviews_1096197.json');
+    var UserReviewresponse = await http.get(Uri.parse(UserReviewurl));
+ //   var UserReviewresponse = await rootBundle.loadString('assets/responses/reviews_1096197.json');
 
-   // if (UserReviewresponse.statusCode == 200) {
-      var UserReviewjson = jsonDecode(UserReviewresponse);
+    if (UserReviewresponse.statusCode == 200) {
+      var UserReviewjson = jsonDecode(UserReviewresponse.body);
       for (var i = 0; i < UserReviewjson['results'].length; i++) {
         UserREviews.add({
           "name": UserReviewjson['results'][i]['author'],
@@ -227,13 +251,13 @@ class _MovieDetailState extends State<MovieDetail> {
           "fullreviewurl": UserReviewjson['results'][i]['url'],
         });
       }
-    // } else {}
+     } else {}
     /////////////////////////////similar movies
-    //var similarmoviesresponse = await http.get(Uri.parse(similarmoviesurl));
-    var similarmoviesresponse = await rootBundle.loadString('assets/responses/similar_1096197.json');
+    var similarmoviesresponse = await http.get(Uri.parse(similarmoviesurl));
+    //var similarmoviesresponse = await rootBundle.loadString('assets/responses/similar_1096197.json');
 
-   // if (similarmoviesresponse.statusCode == 200) {
-      var similarmoviesjson = jsonDecode(similarmoviesresponse);
+    if (similarmoviesresponse.statusCode == 200) {
+      var similarmoviesjson = jsonDecode(similarmoviesresponse.body);
       for (var i = 0; i < similarmoviesjson['results'].length; i++) {
         similarmovieslist.add({
           "poster_path": similarmoviesjson['results'][i]['poster_path'],
@@ -243,14 +267,14 @@ class _MovieDetailState extends State<MovieDetail> {
           "id": similarmoviesjson['results'][i]['id'],
         });
       }
-    //} else {}
+    } else {}
     // print(similarmovieslist);
     /////////////////////////////recommended movies
-   // var recommendedmoviesresponse = await http.get(Uri.parse(recommendedmoviesurl));
-    var recommendedmoviesresponse = await rootBundle.loadString('assets/responses/recommendations_1096197.json');
+    var recommendedmoviesresponse = await http.get(Uri.parse(recommendedmoviesurl));
+   // var recommendedmoviesresponse = await rootBundle.loadString('assets/responses/recommendations_1096197.json');
 
-   // if (recommendedmoviesresponse.statusCode == 200) {
-      var recommendedmoviesjson = jsonDecode(recommendedmoviesresponse);
+    if (recommendedmoviesresponse.statusCode == 200) {
+      var recommendedmoviesjson = jsonDecode(recommendedmoviesresponse.body);
       for (var i = 0; i < recommendedmoviesjson['results'].length; i++) {
         recommendedmovieslist.add({
           "poster_path": recommendedmoviesjson['results'][i]['poster_path'],
@@ -260,14 +284,14 @@ class _MovieDetailState extends State<MovieDetail> {
           "id": recommendedmoviesjson['results'][i]['id'],
         });
       }
-    //} else {}
+    } else {}
     // print(recommendedmovieslist);
     /////////////////////////////movie trailers
-   // var movietrailersresponse = await http.get(Uri.parse(movietrailersurl));
-    var movietrailersresponse = await rootBundle.loadString('assets/responses/videos_1096197.json');
+    var movietrailersresponse = await http.get(Uri.parse(movietrailersurl));
+   // var movietrailersresponse = await rootBundle.loadString('assets/responses/videos_1096197.json');
 
-   // if (movietrailersresponse.statusCode == 200) {
-      var movietrailersjson = jsonDecode(movietrailersresponse);
+    if (movietrailersresponse.statusCode == 200) {
+      var movietrailersjson = jsonDecode(movietrailersresponse.body);
       for (var i = 0; i < movietrailersjson['results'].length; i++) {
         if (movietrailersjson['results'][i]['type'] == "Trailer") {
           movietrailerslist.add({
@@ -276,7 +300,7 @@ class _MovieDetailState extends State<MovieDetail> {
         }
       }
       movietrailerslist.add({'key': 'aJ0cZTcTh90'});
-    //} else {}
+    } else {}
     print(movietrailerslist);
   }void _writeReview() {
     double userRating = 0; // Initialize the user rating
